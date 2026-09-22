@@ -20,7 +20,7 @@ export default async function MeetingPage({
     notFound();
   }
 
-  const meeting = getMeetingById(meetingId);
+  const meeting = await getMeetingById(meetingId);
 
   if (!meeting) {
     notFound();

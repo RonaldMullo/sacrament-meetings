@@ -1,170 +1,132 @@
+import { neon } from "@neondatabase/serverless";
 import type { SacramentMeeting } from "./types";
 
-const meetings: SacramentMeeting[] = [
-  {
-    id: 1,
-    date: "2026-09-13",
-    meetingType: "regular",
-    presiding: "Bishop Calvas",
-    conducting: "Brother Ganvilanes",
-    announcements: ["Ward activity this Saturday at 10:00 AM"],
-    openingHymn: { number: 2, title: "The Spirit of God" },
-    openingPrayer: "Sister Rivera",
-    wardBusiness: [
-      { description: "Sustaining of new Primary presidency" },
-    ],
-    stakeBusiness: false,
-    sacramentHymn: {
-      number: 169,
-      title: "In Remembrance of Thy Suffering",
-    },
-    speakers: [
-      {
-        name: "Sister Romero",
-        topic: "Faith in Jesus Christ",
-        type: "speaker",
-      },
-      {
-        name: "Brother Rubio",
-        topic: "Service",
-        type: "speaker",
-      },
-    ],
-    closingHymn: {
-      number: 31,
-      title: "O God, Our Help in Ages Past",
-    },
-    closingPrayer: "Brother Correa",
-  },
+const sql = neon(process.env.DATABASE_POSTGRES_URL!);
 
-  {
-    id: 2,
-    date: "2026-09-06",
-    meetingType: "testimony",
-    presiding: "Bishop Calvas",
-    conducting: "Brother Ganvilanes",
-    announcements: ["Fast offerings will be collected today"],
-    openingHymn: { number: 85, title: "How Firm a Foundation" },
-    openingPrayer: "Sister Muñoz",
-    wardBusiness: [],
-    stakeBusiness: false,
-    sacramentHymn: {
-      number: 196,
-      title: "Jesus, Once of Humble Birth",
-    },
-    speakers: [
-      {
-        name: "Ward Members",
-        topic: "Testimonies",
-        type: "speaker",
-      },
-    ],
-    closingHymn: { number: 134, title: "I Believe in Christ" },
-    closingPrayer: "Brother Martinez",
-  },
+type MeetingRow = {
+  id: number;
+  date: string | Date;
+  meeting_type: SacramentMeeting["meetingType"];
+  presiding: string;
+  conducting: string;
+  announcements: string[];
+  opening_hymn: SacramentMeeting["openingHymn"];
+  opening_prayer: string;
+  ward_business: SacramentMeeting["wardBusiness"];
+  stake_business: boolean;
+  sacrament_hymn: SacramentMeeting["sacramentHymn"];
+  speakers: SacramentMeeting["speakers"];
+  closing_hymn: SacramentMeeting["closingHymn"];
+  closing_prayer: string;
+};
 
-  {
-    id: 3,
-    date: "2026-08-30",
-    meetingType: "regular",
-    presiding: "Bishop Calvas",
-    conducting: "Brother Ganvilanes",
-    announcements: ["Youth activity Wednesday at 7:00 PM"],
-    openingHymn: { number: 6, title: "Redeemer of Israel" },
-    openingPrayer: "Brother Martinez",
-    wardBusiness: [{ description: "Release of Young Men adviser" }],
-    stakeBusiness: false,
-    sacramentHymn: { number: 172, title: "In Humility, Our Savior" },
-    speakers: [
-      {
-        name: "Sister Gonzalez",
-        topic: "Prayer",
-        type: "speaker",
-      },
-      {
-        name: "Ward Choir",
-        topic: "Sacred musical selection",
-        type: "musical-number",
-      },
-      {
-        name: "Brother Ramirez",
-        topic: "Following Jesus Christ",
-        type: "speaker",
-      },
-    ],
-    closingHymn: { number: 98, title: "I Need Thee Every Hour" },
-    closingPrayer: "Sister Garcia",
-  },
-
-  {
-    id: 4,
-    date: "2026-08-23",
-    meetingType: "stake",
-    presiding: "President Davila",
-    conducting: "President Lascano",
-    announcements: ["Stake conference session"],
-    openingHymn: { number: 3, title: "Now Let Us Rejoice" },
-    openingPrayer: "Sister White",
-    wardBusiness: [],
-    stakeBusiness: true,
-    sacramentHymn: { number: 169, title: "As Now We Take the Sacrament" },
-    speakers: [
-      {
-        name: "President Davila",
-        topic: "Discipleship",
-        type: "speaker",
-      },
-      {
-        name: "Sister Escobar",
-        topic: "Covenants",
-        type: "speaker",
-      },
-    ],
-    closingHymn: { number: 220, title: "Lord, I Would Follow Thee" },
-    closingPrayer: "Brother Benitez",
-  },
-
-  {
-    id: 5,
-    date: "2026-08-16",
-    meetingType: "regular",
-    presiding: "Bishop Calvas",
-    conducting: "Brother Ganvilanes",
-    announcements: ["Temple recommend interviews this Tuesday"],
-    openingHymn: { number: 21, title: "Come, Listen to a Prophet's Voice" },
-    openingPrayer: "Brother Lee",
-    wardBusiness: [{ description: "Calling of new Sunday School teacher" }],
-    stakeBusiness: false,
-    sacramentHymn: { number: 174, title: "While of These Emblems We Partake" },
-    speakers: [
-      {
-        name: "Sister Espinoza",
-        topic: "Personal Revelation",
-        type: "speaker",
-      },
-      {
-        name: "Brother Cumbajin",
-        topic: "Keeping Covenants",
-        type: "speaker",
-      },
-    ],
-    closingHymn: { number: 301, title: "I Am a Child of God" },
-    closingPrayer: "Sister Hernandez",
-  },
-];
-
-export function getMeetings(
-  date?: string | null
-): SacramentMeeting[] {
-  if (date) {
-    return meetings.filter((meeting) => meeting.date === date);
-  }
-
-  return meetings;
+function mapMeeting(row: MeetingRow): SacramentMeeting {
+  return {
+    id: row.id,
+    date:
+      row.date instanceof Date
+        ? row.date.toISOString().split("T")[0]
+        : String(row.date).split("T")[0],
+    meetingType: row.meeting_type,
+    presiding: row.presiding,
+    conducting: row.conducting,
+    announcements: row.announcements ?? [],
+    openingHymn: row.opening_hymn,
+    openingPrayer: row.opening_prayer,
+    wardBusiness: row.ward_business ?? [],
+    stakeBusiness: row.stake_business,
+    sacramentHymn: row.sacrament_hymn,
+    speakers: row.speakers ?? [],
+    closingHymn: row.closing_hymn,
+    closingPrayer: row.closing_prayer,
+  };
 }
 
-export function getMeetingById(
+export async function getMeetings(
+  date?: string | null
+): Promise<SacramentMeeting[]> {
+  let rows;
+
+  if (date) {
+    rows = await sql`
+      SELECT *
+      FROM meetings
+      WHERE date = ${date}
+      ORDER BY date DESC
+    `;
+  } else {
+    rows = await sql`
+      SELECT *
+      FROM meetings
+      ORDER BY date DESC
+    `;
+  }
+
+  return (rows as MeetingRow[]).map(mapMeeting);
+}
+
+export async function getMeetingById(
   id: number
-): SacramentMeeting | null {
-  return meetings.find((meeting) => meeting.id === id) ?? null;
+): Promise<SacramentMeeting | null> {
+  const rows = await sql`
+    SELECT *
+    FROM meetings
+    WHERE id = ${id}
+    LIMIT 1
+  `;
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return mapMeeting(rows[0] as MeetingRow);
+
+  
+}
+
+export async function searchMeetings(
+  query: string,
+  page: number
+): Promise<SacramentMeeting[]> {
+  const pageSize = 5;
+  const offset = (page - 1) * pageSize;
+  const searchTerm = `%${query}%`;
+
+  const rows = await sql`
+    SELECT *
+    FROM meetings
+    WHERE
+      ${query} = ''
+      OR presiding ILIKE ${searchTerm}
+      OR conducting ILIKE ${searchTerm}
+      OR meeting_type ILIKE ${searchTerm}
+      OR speakers::text ILIKE ${searchTerm}
+    ORDER BY date DESC
+    LIMIT ${pageSize}
+    OFFSET ${offset}
+  `;
+
+  return (rows as MeetingRow[]).map(mapMeeting);
+}
+
+export async function getMeetingsPageCount(
+  query: string
+): Promise<number> {
+  const pageSize = 5;
+  const searchTerm = `%${query}%`;
+
+  const rows = await sql`
+    SELECT COUNT(*)::int AS count
+    FROM meetings
+    WHERE
+      ${query} = ''
+      OR presiding ILIKE ${searchTerm}
+      OR conducting ILIKE ${searchTerm}
+      OR meeting_type ILIKE ${searchTerm}
+      OR speakers::text ILIKE ${searchTerm}
+  `;
+
+  const count = Number(rows[0].count);
+
+  return Math.ceil(count / pageSize);
 }
