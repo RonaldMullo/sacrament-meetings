@@ -49,6 +49,7 @@ export default function MeetingSearch() {
       <input
         id="meeting-search"
         type="search"
+        aria-label="Search meetings"
         placeholder="Speaker, presiding, conducting, or meeting type"
         value={term}
         onChange={(event) => handleSearch(event.target.value)}

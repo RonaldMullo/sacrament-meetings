@@ -79,7 +79,10 @@ export default async function MeetingsPage({
         )}
       </div>
 
-      <div className="mt-6 flex items-center justify-between">
+      <nav
+  aria-label="Pagination"
+  className="mt-6 flex items-center justify-between"
+>
   {currentPage > 1 ? (
     <Link
       href={`/meetings?${new URLSearchParams({
@@ -111,7 +114,7 @@ export default async function MeetingsPage({
   ) : (
     <span />
   )}
-</div>
+</nav>
     </section>
   );
 }
