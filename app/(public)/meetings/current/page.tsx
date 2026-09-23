@@ -1,8 +1,5 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import MeetingDetail from "@/components/MeetingDetail";
-import type { SacramentMeeting } from "@/lib/types";
+import { redirect } from "next/navigation";
+import { getMeetings } from "@/lib/meetings-db";
 
 function getMostRecentSunday(): string {
   const today = new Date();
@@ -17,68 +14,14 @@ function getMostRecentSunday(): string {
   return `${year}-${month}-${day}`;
 }
 
-export default function CurrentMeetingPage() {
-  const [meeting, setMeeting] =
-    useState<SacramentMeeting | null>(null);
+export default async function CurrentMeetingPage() {
+  const mostRecentSunday = getMostRecentSunday();
+  const meetings = await getMeetings(mostRecentSunday);
+  const meeting = meetings[0];
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function loadCurrentMeeting() {
-      try {
-        const date = getMostRecentSunday();
-
-        const response = await fetch(
-          `/api/meetings?date=${date}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch meeting");
-        }
-
-        const data: SacramentMeeting[] =
-          await response.json();
-
-        if (data.length === 0) {
-          setError(
-            "No sacrament meeting was found for the most recent Sunday."
-          );
-          return;
-        }
-
-        setMeeting(data[0]);
-      } catch {
-        setError("Unable to load the current meeting.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadCurrentMeeting();
-  }, []);
-
-  if (loading) {
-    return (
-      <p className="text-gray-600">
-        Loading current meeting...
-      </p>
-    );
+  if (!meeting) {
+    redirect("/meetings");
   }
 
-  if (error || !meeting) {
-    return (
-      <section>
-        <h1 className="text-3xl font-bold">
-          Current Meeting
-        </h1>
-
-        <p className="mt-4 text-gray-600">
-          {error}
-        </p>
-      </section>
-    );
-  }
-
-  return <MeetingDetail meeting={meeting} />;
+  redirect(`/meetings/${meeting.id}`);
 }
