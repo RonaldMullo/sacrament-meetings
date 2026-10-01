@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { deleteMeeting } from "@/lib/actions";
 
 import {
   getMeetingsPageCount,
@@ -74,6 +75,24 @@ export default async function MeetingsPage({
               <p className="text-sm text-gray-600">
                 Conducting: {meeting.conducting}
               </p>
+              <div className="mt-4 flex items-center gap-4">
+  <Link
+    href={`/meetings/${meeting.id}/edit`}
+    className="font-semibold text-blue-700 hover:underline"
+  >
+    Edit
+  </Link>
+
+  <form action={deleteMeeting.bind(null, meeting.id)}>
+    <button
+      type="submit"
+      className="font-semibold text-red-700 hover:underline"
+      aria-label={`Delete meeting from ${meeting.date}`}
+    >
+      Delete
+    </button>
+  </form>
+</div>
             </article>
           ))
         )}
