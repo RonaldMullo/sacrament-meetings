@@ -197,3 +197,27 @@ export async function deleteMeeting(id: number): Promise<void> {
     WHERE id = ${id}
   `;
 }
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+};
+
+export async function getUserByEmail(
+  email: string
+): Promise<User | undefined> {
+  try {
+    const rows = await sql`
+      SELECT id, name, email, password
+      FROM users
+      WHERE email = ${email}
+      LIMIT 1
+    `;
+
+    return rows[0] as User | undefined;
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    throw new Error('Failed to fetch user.');
+  }
+}

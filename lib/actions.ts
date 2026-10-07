@@ -9,6 +9,16 @@ import {
   deleteMeeting as deleteMeetingDb,
   getMeetingById,
 } from './meetings-db';
+import { auth } from '@/auth';
+
+async function requireAuth() {
+  const session = await auth();
+
+  if (!session?.user) {
+    throw new Error('You must be signed in to perform this action.');
+  }
+}
+
 const MeetingSchema = z.object({
   date: z.string().min(1, 'Please select a meeting date.'),
   meetingType: z.enum([
@@ -63,6 +73,8 @@ export async function createMeeting(
   prevState: State,
   formData: FormData
 ): Promise<State> {
+  await requireAuth();
+
   const validatedFields = MeetingSchema.safeParse({
     date: formData.get('date'),
     meetingType: formData.get('meetingType'),
@@ -127,6 +139,8 @@ export async function updateMeeting(
   prevState: State,
   formData: FormData
 ): Promise<State> {
+  await requireAuth();
+
   const validatedFields = MeetingSchema.safeParse({
     date: formData.get('date'),
     meetingType: formData.get('meetingType'),
@@ -202,6 +216,8 @@ redirect('/meetings');
 }
 
 export async function deleteMeeting(id: number): Promise<void> {
+  await requireAuth();
+
   try {
     await deleteMeetingDb(id);
   } catch (error) {

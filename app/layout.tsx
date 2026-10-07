@@ -16,8 +16,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sacrament-meetings-wine-five.vercel.app"),
+
   title: "Sacrament Meeting Planner",
   description: "Plan and review sacrament meeting programs.",
+
+  openGraph: {
+    title: "Sacrament Meeting Planner",
+    description: "Plan and review sacrament meeting programs.",
+    type: "website",
+    images: [
+      {
+        url: "/sacrament-meeting.png",
+        width: 200,
+        height: 200,
+        alt: "Sacrament Meeting Planner",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

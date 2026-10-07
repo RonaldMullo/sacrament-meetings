@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,6 +9,32 @@ interface MeetingPageProps {
   params: Promise<{
     id: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: MeetingPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const meetingId = Number(id);
+
+  if (!Number.isInteger(meetingId)) {
+    return {
+      title: "Meeting Not Found | Sacrament Meeting Planner",
+    };
+  }
+
+  const meeting = await getMeetingById(meetingId);
+
+  if (!meeting) {
+    return {
+      title: "Meeting Not Found | Sacrament Meeting Planner",
+    };
+  }
+
+  return {
+    title: `${meeting.date} Meeting | Sacrament Meeting Planner`,
+    description: `View the ${meeting.meetingType} sacrament meeting program for ${meeting.date}.`,
+  };
 }
 
 export default async function MeetingPage({

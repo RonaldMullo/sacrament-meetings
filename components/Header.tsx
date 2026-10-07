@@ -1,7 +1,11 @@
 import Link from "next/link";
 import NavLinks from "./NavLinks";
+import LogoutButton from "./LogoutButton";
+import { auth } from "@/auth";
 
-export default function Header() {
+export default async function Header() {
+  const session = await auth();
+
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -26,7 +30,20 @@ export default function Header() {
             </p>
           </div>
 
-          <NavLinks />
+          <div className="flex flex-wrap items-center gap-4">
+            <NavLinks />
+
+            {session?.user ? (
+              <LogoutButton />
+            ) : (
+              <Link
+                href="/login"
+                className="font-medium text-gray-700 transition-colors hover:text-blue-700"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </header>
